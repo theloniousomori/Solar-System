@@ -74,6 +74,3 @@ while True:
     saturn.update_pos(i)
     venus.update_pos(i)
     mercury.update_pos(i)
-
-#if i > len(sun.x)
-    #earth.update[i-len(sun(x))]
