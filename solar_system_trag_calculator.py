@@ -1,23 +1,28 @@
 import numpy as np
+'''
+This file creates a numpy array of the positions of each planet in the solar system for one full orbit
+Each position in the final tragectory is approximately seperated by one earth day
+
+'''
 
 
 class planet:
     def __init__(self, name, m, r0, v0, period):
         self.name = name
-        self.period = int(period * 24 * 60 * 60)
-        self.n_days = period
-        self.t_steps = np.linspace(0, int(self.period), int(1e7))
-        self.dt = self.t_steps[1] - self.t_steps[0]
-        self.step = int((60*60*24)/self.dt)
-        self.a = np.zeros((len(self.t_steps),3))
+        self.period = int(period * 24 * 60 * 60) #period is the time period taken to complete 1 orbit for each planet in earth days
+        self.n_days = period #defines the number of days taken for one orbit
+        self.t_steps = np.linspace(0, int(self.period), int(1e7)) #the number of t_steps can be chnaged to increase the resolution of simulation
+        self.dt = self.t_steps[1] - self.t_steps[0] #defining dt for integration
+        self.step = int((60*60*24)/self.dt) #this step is created so we know how many tiem steps to skip when saving the final tragectory as position per each earth day, this is to reduce storage required
+        self.a = np.zeros((len(self.t_steps),3)) 
         self.v = np.zeros((len(self.t_steps),3))
         self.r = np.zeros((len(self.t_steps),3))
-        self.m = m
-        self.v[0] = v0
-        self.r[0] = r0
-        self.trag = np.zeros((self.n_days, 3))
+        self.m = m #mass 
+        self.v[0] = v0 #defining initial velocity
+        self.r[0] = r0 #defining initial radius 
+        self.trag = np.zeros((self.n_days, 3)) #preparing an empty array for final tragectory
     
-    def calculate_trag(self):
+    def calculate_trag(self): #numerically integrates the selected planet assuming the sun is fixed in place
         if self.step > 1:
             r_sun = np.zeros((len(self.t_steps),3))
             for i in range(0, len(self.t_steps) - 1):
@@ -29,7 +34,7 @@ class planet:
                 if i % 1000 == 0:  
                     print(f"{self.name} Progress: {i / len(self.t_steps) * 100}%")
             sun_trag = np.zeros((self.n_days,3))
-            for i in range(0, self.n_days):
+            for i in range(0, self.n_days): #reduces the size of the final array such that the length is the number of days as opposed to the number of time steps
                 self.trag[i] = self.r[i * self.step]
                 sun_trag[i] = r_sun[i * self.step]
                 print(i/len(self.trag) * 100)
@@ -37,15 +42,18 @@ class planet:
             np.save('planet_data/Sun_trag', sun_trag)
             print('Tragectories Calculated!')
         else:
-            print('error skip is too small')
+            print('error step is too small')
 
 
 
 #assume sun to be fixed in place
+#defining all the required constants 
 m_sun = 1.989e30
 G = 6.674e-11
 AU = 1.496e11
-    
+
+
+#all data is taken from nasas website     
 Earth = planet('Earth',5.972e24, np.array([AU,0,0]), np.array([0, 29.75e3, 0]), 365) 
 Mars = planet('Mars',0.642e24, np.array([1.5 * AU,0,0]), np.array([0, 24.1e3, 0]), 687)
 Jupiter = planet('Jupiter', 1898.13e24, np.array([5.2* AU,0,0]), np.array([0, 13.06e3,0]), 4331)
